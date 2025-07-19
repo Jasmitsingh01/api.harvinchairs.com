@@ -6,7 +6,7 @@
     <div class="col-lg-12">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <a class="btn btn-success" href="{{ route('admin.categories.create') }}">
+        <a class="btn btn-success" href="{{ route('admin.categories.create') }}">
                     <i class="fas fa-plus"></i> {{ trans('global.add') }} {{ trans('cruds.category.title_singular') }}
                 </a>
                 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#importModal">
@@ -442,7 +442,7 @@ $(document).ready(function() {
             });
         }
     });
-    
+
     function updateCategoryTable(categories) {
         const tbody = $('#category-table tbody');
         tbody.empty();
@@ -496,7 +496,7 @@ $(document).ready(function() {
     }
     
     function loadCategoryStats() {
-        $.ajax({
+                $.ajax({
             url: '{{ route("admin.categories.stats") }}',
             method: 'GET',
             success: function(stats) {
@@ -504,9 +504,9 @@ $(document).ready(function() {
                 $('#enabled-categories').text(stats.enabled_categories);
                 $('#categories-with-products').text(stats.categories_with_products);
                 $('#categories-with-children').text(stats.categories_with_children);
+                    }
+                });
             }
-        });
-    }
     
     // Status update functionality
     $('.btn-active, .btn-inactive').click(function() {
@@ -514,7 +514,7 @@ $(document).ready(function() {
         const currentStatus = $(this).hasClass('btn-active');
         const newStatus = !currentStatus;
         
-        $.ajax({
+                $.ajax({
             url: '{{ route("admin.categories.updateStatus") }}',
             method: 'POST',
             data: {
