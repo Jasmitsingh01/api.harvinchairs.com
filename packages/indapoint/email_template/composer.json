@@ -1,0 +1,24 @@
+{
+    "name": "jigar.dave/email-template",
+    "description": "Manage email templates",
+    "type": "indapoint-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jigar Dave",
+            "email": "jigar@indapoint.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Indapoint\\EmailTemplate\\EmailTemplateServiceProvider"
+            ],
+            "aliases": {
+                "Facade": "Indapoint\\EmailTemplate\\Facades\\EmailTemplateFacade"
+            }
+        }
+    },
+    "require": {}
+}
