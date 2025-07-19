@@ -38,10 +38,5 @@
     "BROADCAST_DRIVER": "log",
     "LOG_CHANNEL": "stack",
     "LOG_LEVEL": "error"
-  },
-  "functions": {
-    "public/index.php": {
-      "maxDuration": 30
-    }
   }
 } 
