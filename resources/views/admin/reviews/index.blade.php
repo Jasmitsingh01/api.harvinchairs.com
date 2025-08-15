@@ -1,0 +1,245 @@
+@extends('layouts.admin')
+@section('content')
+    @can('review_create')
+        <div style="margin-bottom: 10px;" class="row">
+            <div class="col-lg-12">
+                <a class="btn btn-success" href="{{ route('admin.reviews.create') }}">
+                    {{ trans('global.add') }} {{ trans('cruds.review.title_singular') }}
+                </a>
+            </div>
+        </div>
+    @endcan
+    <div class="card">
+        <div class="card-header">
+            {{ trans('cruds.review.title_singular') }} {{ trans('global.list') }}
+        </div>
+
+        <div class="card-body">
+            <table class=" table table-bordered table-striped table-hover ajaxTable datatable datatable-Review">
+                <thead>
+                    <tr>
+                        <th width="10">
+
+                        </th>
+                        <th>
+                            {{ trans('cruds.review.fields.id') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.review.fields.customer_name') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.review.fields.product') }}
+                        </th>
+
+                        <th>
+                            {{ trans('cruds.review.fields.title') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.review.fields.comment') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.review.fields.rating') }}
+                        </th>
+                        <th>
+                            Date
+                        </th>
+                        <th>
+                            {{ trans('cruds.review.fields.is_active') }}
+                        </th>
+
+
+                        <th>
+                            &nbsp;
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <input class="search input-id" type="text" placeholder="{{ trans('global.search') }}">
+                        </td>
+                        <td>
+                            <input class="search input-category" type="text" placeholder="{{ trans('global.search') }}">
+                        </td>
+                        <td>
+
+                        </td>
+
+                        <td>
+                            <input class="search input-category" type="text" placeholder="{{ trans('global.search') }}">
+                        </td>
+                        <td>
+                            <input class="search input-category" type="text" placeholder="{{ trans('global.search') }}">
+                        </td>
+                        <td>
+                            <input class="search input-id" type="text" placeholder="{{ trans('global.search') }}">
+                        </td>
+                        <td>
+                        </td>
+                        <td>
+                            <input class="search input-category" type="text" placeholder="{{ trans('global.search') }}">
+                        </td>
+
+                        <td>
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+@endsection
+@section('scripts')
+    @parent
+    <script>
+        $(function() {
+            let dtButtons = $.extend(true, [], $.fn.dataTable.defaults.buttons)
+            @can('review_delete')
+                let deleteButtonTrans = '{{ trans('global.datatables.delete') }}';
+                let deleteButton = {
+                    text: deleteButtonTrans,
+                    url: "{{ route('admin.reviews.massDestroy') }}",
+                    className: 'btn-danger',
+                    action: function(e, dt, node, config) {
+                        var ids = $.map(dt.rows({
+                            selected: true
+                        }).data(), function(entry) {
+                            return entry.id
+                        });
+
+                        if (ids.length === 0) {
+                            alert('{{ trans('global.datatables.zero_selected') }}')
+
+                            return
+                        }
+
+                        if (confirm('{{ trans('global.areYouSure') }}')) {
+                            $.ajax({
+                                    headers: {
+                                        'x-csrf-token': _token
+                                    },
+                                    method: 'POST',
+                                    url: config.url,
+                                    data: {
+                                        ids: ids,
+                                        _method: 'DELETE'
+                                    }
+                                })
+                                .done(function() {
+                                    location.reload()
+                                })
+                        }
+                    }
+                }
+                dtButtons.push(deleteButton)
+            @endcan
+
+            let dtOverrideGlobals = {
+                buttons: dtButtons,
+                processing: true,
+                serverSide: true,
+                retrieve: true,
+                aaSorting: [],
+                ajax: "{{ route('admin.reviews.index') }}",
+                columns: [{
+                        data: 'placeholder',
+                        name: 'placeholder'
+                    },
+                    {
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'customer_name',
+                        name: 'customer_name'
+                    },
+                    {
+                        data: 'product_name',
+                        name: 'product.name'
+                    },
+                    {
+                        data: 'title',
+                        name: 'title'
+                    },
+                    {
+                        data: 'comment',
+                        name: 'comment'
+                    },
+                    {
+                        data: 'rating',
+                        name: 'rating'
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at'
+                    },
+                    {
+                        data: 'is_active',
+                        name: 'is_active'
+                    },
+                    {
+                        data: 'actions',
+                        name: '{{ trans('global.actions') }}'
+                    }
+                ],
+                orderCellsTop: true,
+                order: [
+                    [1, 'desc']
+                ],
+                pageLength: 10,
+            };
+            let table = $('.datatable-Review').DataTable(dtOverrideGlobals);
+            $('a[data-toggle="tab"]').on('shown.bs.tab click', function(e) {
+                $($.fn.dataTable.tables(true)).DataTable()
+                    .columns.adjust();
+            });
+
+            let visibleColumnsIndexes = null;
+            $('.datatable thead').on('input', '.search', function() {
+                let strict = $(this).attr('strict') || false
+                let value = strict && this.value ? "^" + this.value + "$" : this.value
+
+                let index = $(this).parent().index()
+                if (visibleColumnsIndexes !== null) {
+                    index = visibleColumnsIndexes[index]
+                }
+
+                table
+                    .column(index)
+                    .search(value, strict)
+                    .draw()
+            });
+            table.on('column-visibility.dt', function(e, settings, column, state) {
+                visibleColumnsIndexes = []
+                table.columns(":visible").every(function(colIdx) {
+                    visibleColumnsIndexes.push(colIdx);
+                });
+            })
+        });
+
+        $(document).on('click', '.btn-active, .btn-inactive', function() {
+            var id = $(this).data('id');
+            var isActive = $(this).hasClass('btn-active');
+            var newStatus = isActive ? 0 : 1;
+            updateStatus(id, 'is_active', newStatus);
+        });
+
+        function updateStatus(id, field, value) {
+            $.ajax({
+                url: "{{ route('admin.reviews.updateStatus') }}",
+                type: "POST",
+                data: {
+                    id: id,
+                    field: field,
+                    value: value,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function() {
+                    $('.datatable-Review').DataTable().ajax.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+    </script>
+@endsection
