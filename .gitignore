@@ -5,7 +5,8 @@
 /storage/framework/cache
 /storage/tmp/uploads/
 /vendor
-
+.env
+.env.backup
 .phpunit.result.cache
 docker-compose.override.yml
 Homestead.json
