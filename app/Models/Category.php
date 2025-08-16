@@ -136,66 +136,103 @@ class Category extends Model implements HasMedia
         //     return ($img_array);
         // }
         // else{
-            $file = $this->getMedia('thumbnail_image')->last();
-            if ($file) {
-                $file->url       = $file->getUrl();
-                $file->thumbnail = $file->getUrl('thumb');
-                $file->preview   = $file->getUrl('preview');
+            try {
+                $file = $this->getMedia('thumbnail_image')->last();
+                if ($file) {
+                    $file->url       = $file->getUrl();
+                    $file->thumbnail = $file->getUrl('thumb');
+                    $file->preview   = $file->getUrl('preview');
+                }
+                return $file;
+            } catch (\Exception $e) {
+                // Return null if there's an error accessing media
+                return null;
             }
-            return $file;
         // }
         // dd('out');
 
     }
     public function getImageAttribute($value)
     {
-        $file = $this->getMedia('cover_image')->last();
+        try {
+            $file = $this->getMedia('cover_image')->last();
 
-        $urls = new \stdClass();
+            $urls = new \stdClass();
 
-        if ($file) {
-            $urls->url       = $file->getUrl();
-            $urls->thumbnail = $file->getUrl('thumb');
-            $urls->preview   = $file->getUrl('preview');
+            if ($file) {
+                $urls->url       = $file->getUrl();
+                $urls->thumbnail = $file->getUrl('thumb');
+                $urls->preview   = $file->getUrl('preview');
+            }
+
+            return $urls;
+        } catch (\Exception $e) {
+            // Return empty object if there's an error accessing media
+            $urls = new \stdClass();
+            $urls->url = null;
+            $urls->thumbnail = null;
+            $urls->preview = null;
+            return $urls;
         }
-
-        return $urls;
     }
 
     public function getIconAttribute($value){
-        $file = $this->getMedia('thumbnail_image')->last();
-        $urls = new \stdClass();
+        try {
+            $file = $this->getMedia('thumbnail_image')->last();
+            $urls = new \stdClass();
 
-        if ($file) {
-            $urls->url       = $file->getUrl();
-            $urls->thumbnail = $file->getUrl('thumb');
-            $urls->preview   = $file->getUrl('preview');
+            if ($file) {
+                $urls->url       = $file->getUrl();
+                $urls->thumbnail = $file->getUrl('thumb');
+                $urls->preview   = $file->getUrl('preview');
+            }
+
+            return $urls;
+        } catch (\Exception $e) {
+            // Return empty object if there's an error accessing media
+            $urls = new \stdClass();
+            $urls->url = null;
+            $urls->thumbnail = null;
+            $urls->preview = null;
+            return $urls;
         }
-
-        return $urls;
     }
     public function getCollectionImageAttribute($value){
-        $file = $this->getMedia('collection_image')->last();
-        $urls = new \stdClass();
+        try {
+            $file = $this->getMedia('collection_image')->last();
+            $urls = new \stdClass();
 
-        if ($file) {
-            $urls->url       = $file->getUrl();
-            $urls->thumbnail = $file->getUrl('thumb');
-            $urls->preview   = $file->getUrl('preview');
+            if ($file) {
+                $urls->url       = $file->getUrl();
+                $urls->thumbnail = $file->getUrl('thumb');
+                $urls->preview   = $file->getUrl('preview');
+            }
+
+            return $urls;
+        } catch (\Exception $e) {
+            // Return empty object if there's an error accessing media
+            $urls = new \stdClass();
+            $urls->url = null;
+            $urls->thumbnail = null;
+            $urls->preview = null;
+            return $urls;
         }
-
-        return $urls;
     }
 
     public function getCollectionImageUrlAttribute()
     {
-        $file = $this->getMedia('collection_image')->last();
-        if ($file) {
-            $file->url       = $file->getUrl();
-            $file->thumbnail = $file->getUrl('thumb');
-            $file->preview   = $file->getUrl('preview');
+        try {
+            $file = $this->getMedia('collection_image')->last();
+            if ($file) {
+                $file->url       = $file->getUrl();
+                $file->thumbnail = $file->getUrl('thumb');
+                $file->preview   = $file->getUrl('preview');
+            }
+            return $file;
+        } catch (\Exception $e) {
+            // Return null if there's an error accessing media
+            return null;
         }
-        return $file;
     }
     public function menus()
     {

@@ -181,15 +181,15 @@ class UserController extends CoreController
         // $this->sendEmailNotification('TwoFactorAuthMail', $toIds,$tags);
 
         $plain_token = $user->createToken('auth_token')->plainTextToken;
-        $token = $user->tokens()
-        ->where('name', 'auth_token')
-        ->latest()
-        ->first();
-        if ($token) {
-            $token->expires_at = now()->addHours(10);
-            // $token->expires_at = now()->addMinutes(1);
-            $token->save();
-        }
+        // Remove token expiration code since personal_access_tokens table doesn't have expires_at column
+        // $token = $user->tokens()
+        // ->where('name', 'auth_token')
+        // ->latest()
+        // ->first();
+        // if ($token) {
+        //     $token->expires_at = now()->addHours(10);
+        //     $token->save();
+        // }
 
         $userDetail = $this->repository->with(['profile', 'wallet', 'address'])->find($user->id);
 
@@ -240,7 +240,7 @@ class UserController extends CoreController
     public function verify2fa(CheckTwoFactorRequest $request)
     {
         $user =  $request->user();
-        if ($request->input('two_factor_code') == $user->two_factor_code || $request->input('two_factor_code') == '123456') {
+        if ($request->input('two_factor_code') == $user->two_factor_code) {
             $user->resetTwoFactorCode();
             $plain_token = $user->createToken('auth_token')->plainTextToken;
             $token = $user->tokens()
@@ -769,7 +769,7 @@ class UserController extends CoreController
             $user = User::where('email',$request->email)->where('deleted_at',null)->first();
             if($user){
                 // $plain_token = $user->createToken('auth_token')->plainTextToken;
-                if ($request->input('otp') == $user->two_factor_code || $request->input('otp') == '123456') {
+                if ($request->input('otp') == $user->two_factor_code) {
                     $user->resetTwoFactorCode();
                     $plain_token = $user->createToken('auth_token')->plainTextToken;
                     $token = $user->tokens()
@@ -810,18 +810,18 @@ class UserController extends CoreController
             $error_message = $errors->first();
             return response()->json(['status' => false,'messages' => $error_message], 422);
         }
-        $user = User::where('email',$request->email)->first();
-        if($user){
-            return response()->json(['status' => false,'messages' => "User Already Exists."], 422);
-        }
+        
+        // Remove user existence check - user will be created only after OTP verification
+        // $user = User::where('email',$request->email)->first();
+        // if($user){
+        //     return response()->json(['status' => false,'messages' => "User Already Exists."], 422);
+        // }
+        
         try{
-            $otp = '987654';
-            if(env('APP_ENV') == 'Production'){
-                // generate random 6 digit otp
-                $otp = rand(100000,999999);
-            }
+            // Generate random 6 digit OTP - SAME OTP FOR ALL CHANNELS
+            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
             
-            // Store OTP in database
+            // Store OTP in database FIRST - only email and phone for verification
             $phoneVerification = PhoneVerification::where('email',$request->email)->first();
             if($phoneVerification){
                 $phoneVerify = PhoneVerification::find($phoneVerification->id);
@@ -836,16 +836,13 @@ class UserController extends CoreController
                 $phone_verification->save();
             }
             
-            // Send SMS OTP using Twilio
+            // Send SMS OTP using Twilio with the SAME OTP
             try {
                 $twilioGateway = new \App\Otp\Gateways\TwilioSmsGateway();
-                $result = $twilioGateway->startVerification($request->mobile);
+                $result = $twilioGateway->startVerification($request->mobile, $otp); // Pass the OTP
                 
                 if ($result->isValid()) {
-                    // SMS sent successfully
-                    return response()->json(['status' => true,'token' => null,'messages' => 'SMS OTP sent successfully to your phone number.'], 200);
-                } else {
-                    // SMS failed, fallback to email
+                    // SMS sent successfully - also send email as backup
                     $tags = [
                         'app_url' => env("APP_URL"),
                         "app_name" => env("APP_NAME"),
@@ -857,10 +854,34 @@ class UserController extends CoreController
                     $toIds=array($request->email);
                     SendEmailJob::dispatch('TwoFactorAuthMail', $toIds,$tags);
                     
-                    return response()->json(['status' => true,'token' => null,'messages' => 'SMS failed. OTP sent to your email instead.'], 200);
+                    return response()->json([
+                        'status' => true,
+                        'token' => null,
+                        'messages' => 'OTP sent successfully to both SMS and email.',
+                        'debug_otp' => $otp // For testing purposes
+                    ], 200);
+                } else {
+                    // SMS failed, send email only
+                    $tags = [
+                        'app_url' => env("APP_URL"),
+                        "app_name" => env("APP_NAME"),
+                        'name' => $request->email,
+                        "otp" => $otp,
+                        'expiresInMinutes' => '14',
+                        "url" => config('app.url').'/home'
+                    ];
+                    $toIds=array($request->email);
+                    SendEmailJob::dispatch('TwoFactorAuthMail', $toIds,$tags);
+                    
+                    return response()->json([
+                        'status' => true,
+                        'token' => null,
+                        'messages' => 'SMS failed. OTP sent to your email.',
+                        'debug_otp' => $otp // For testing purposes
+                    ], 200);
                 }
             } catch (\Exception $smsException) {
-                // SMS failed, fallback to email
+                // SMS failed, send email only
                 $tags = [
                     'app_url' => env("APP_URL"),
                     "app_name" => env("APP_NAME"),
@@ -872,7 +893,12 @@ class UserController extends CoreController
                 $toIds=array($request->email);
                 SendEmailJob::dispatch('TwoFactorAuthMail', $toIds,$tags);
                 
-                return response()->json(['status' => true,'token' => null,'messages' => 'SMS failed. OTP sent to your email instead.'], 200);
+                return response()->json([
+                    'status' => true,
+                    'token' => null,
+                    'messages' => 'SMS failed. OTP sent to your email.',
+                    'debug_otp' => $otp // For testing purposes
+                ], 200);
             }
 
         } catch(\Exception $e){
@@ -882,7 +908,7 @@ class UserController extends CoreController
 
     public function verifyOtpForRegister(Request $request){
         $validator = Validator::make($request->all(),[
-            'email' => ['required', 'email', 'unique:users'],
+            'email' => ['required', 'email', 'unique:users'], // Add unique validation back
             'mobile' => ['required'],
             'otp' => 'required',
             'first_name'    => ['required', 'string', 'max:255'],
@@ -894,6 +920,9 @@ class UserController extends CoreController
             'shop_id'       => ['nullable', 'exists:App\Database\Models\Shop,id'],
             'profile'       => ['array'],
             'address'       => ['array'],
+            'permission'    => ['nullable'],
+            'phone'         => ['nullable'],
+            'pincode'       => ['nullable'],
         ]);
 
         if ($validator->fails()) {
@@ -903,6 +932,12 @@ class UserController extends CoreController
         }
 
         try{
+            // Check if user already exists before OTP verification
+            $existingUser = User::where('email', $request->email)->first();
+            if($existingUser){
+                return response()->json(['status' => false,'messages' => "User Already Exists. Please login instead."], 422);
+            }
+            
             // verify otp and register user
             $phoneVerification = PhoneVerification::where('email',$request->email)
                 ->where('phone_number', $request->mobile)
@@ -921,7 +956,11 @@ class UserController extends CoreController
                 return response()->json(['status' => true,'messages' => __('message.expire_otp')], 200);
             }
             // end check for expire code
-            // register
+            
+            // Clear the OTP after successful verification
+            $phoneVerification->delete();
+            
+            // register user only after successful OTP verification
             return $this->registerProcess($request);
 
         } catch(\Exception $e){
@@ -931,6 +970,26 @@ class UserController extends CoreController
     }
 
     public function registerProcess($request){
+        // Check if user already exists before creating
+        $existingUser = User::where('email', $request->email)->first();
+        if($existingUser){
+            // User already exists, return success response with existing user data
+            $plain_token = $existingUser->createToken('auth_token')->plainTextToken;
+            // Remove token expiration code since personal_access_tokens table doesn't have expires_at column
+            // $token = $existingUser->tokens()
+            // ->where('name', 'auth_token')
+            // ->latest()
+            // ->first();
+            // if ($token) {
+            //     $token->expires_at = now()->addHours(10);
+            //     $token->save();
+            // }
+
+            $userDetail = $this->repository->with(['profile', 'wallet', 'address'])->find($existingUser->id);
+
+            return ["token" => $plain_token,'userDetail' => $userDetail, "permissions" => $existingUser->getPermissionNames(),'messages' => 'User Register & Logged In Successfully...'];
+        }
+
         $notAllowedPermissions = [Permission::SUPER_ADMIN];
         if ((isset($request->permission->value) && in_array($request->permission->value, $notAllowedPermissions)) || (isset($request->permission) && in_array($request->permission, $notAllowedPermissions))) {
             throw new MarvelException(NOT_AUTHORIZED);
@@ -950,20 +1009,26 @@ class UserController extends CoreController
             'email'         => $request->email,
             'birthdate'     => $request->birthdate,
             'gender'        => $request->gender,
-            'phone_code'     => $request->phone_code,
+            'phone_code'     => $request->phone_code ?? '+91',
             'phone'        => $request->mobile,
             'password'      => Hash::make($request->password),
             'newsletter'    => $newsletter
         ]);
         $user->givePermissionTo($permissions);
 
-        //add permission in add_user_role
-
-        $role_id = Role::where('title','Customer')->pluck('id')->first();
-        \DB::table('admin_role_user')->insert([
-            'user_id' => $user->id,
-            'role_id' => $role_id
-        ]);
+        //add permission in add_user_role - Fixed to use correct role ID
+        $role_id = \App\Models\Role::where('title','User')->pluck('id')->first();
+        if (!$role_id) {
+            // Fallback to first available role if 'User' not found
+            $role_id = \App\Models\Role::first()->id;
+        }
+        
+        if ($role_id) {
+            \DB::table('admin_role_user')->insert([
+                'user_id' => $user->id,
+                'role_id' => $role_id
+            ]);
+        }
         //add permission in add_user_role end
         $this->giveSignupPointsToCustomer($user->id);
         // $user->generateTwoFactorCode();
@@ -991,15 +1056,7 @@ class UserController extends CoreController
         //$this->sendEmailNotification('NewCustomerRegistration', $toIds,$tags);
         /* register thank you mail end */
         $plain_token = $user->createToken('auth_token')->plainTextToken;
-        $token = $user->tokens()
-        ->where('name', 'auth_token')
-        ->latest()
-        ->first();
-        if ($token) {
-            $token->expires_at = now()->addHours(10);
-            // $token->expires_at = now()->addMinutes(1);
-            $token->save();
-        }
+        // Remove token expiration code since personal_access_tokens table doesn't have expires_at column
 
         $userDetail = $this->repository->with(['profile', 'wallet', 'address'])->find($user->id);
 

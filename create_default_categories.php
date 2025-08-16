@@ -21,12 +21,12 @@ try {
     
     echo "Using type: {$type->name} (ID: {$type->id})\n\n";
     
-    // Default parent categories for a furniture store
+    // Default parent categories for a furniture store with specific furniture types
     $defaultCategories = [
         [
-            'name' => 'Living Room',
-            'slug' => 'living-room',
-            'details' => 'Comfortable and stylish furniture for your living room',
+            'name' => 'Beds',
+            'slug' => 'beds',
+            'details' => 'Comfortable beds for all room sizes and styles',
             'type_id' => $type->id,
             'parent' => null,
             'language' => 'en',
@@ -35,14 +35,14 @@ try {
             'is_showcase' => 1,
             'cgst_rate' => 12,
             'sgst_rate' => 12,
-            'meta_title' => 'Living Room Furniture - Harvin Chairs',
-            'meta_description' => 'Discover beautiful living room furniture including sofas, chairs, tables and more.',
-            'meta_keywords' => 'living room, furniture, sofa, chairs, tables'
+            'meta_title' => 'Beds - Harvin Chairs',
+            'meta_description' => 'Single beds, double beds, queen beds, king beds, and bunk beds for every bedroom.',
+            'meta_keywords' => 'beds, single bed, double bed, queen bed, king bed, bunk bed, bedroom furniture'
         ],
         [
-            'name' => 'Bedroom',
-            'slug' => 'bedroom',
-            'details' => 'Elegant bedroom furniture for a peaceful sleep',
+            'name' => 'Sofas & Couches',
+            'slug' => 'sofas-couches',
+            'details' => 'Stylish sofas and couches for your living room',
             'type_id' => $type->id,
             'parent' => null,
             'language' => 'en',
@@ -51,14 +51,14 @@ try {
             'is_showcase' => 1,
             'cgst_rate' => 12,
             'sgst_rate' => 12,
-            'meta_title' => 'Bedroom Furniture - Harvin Chairs',
-            'meta_description' => 'Complete your bedroom with our collection of beds, wardrobes, and bedside tables.',
-            'meta_keywords' => 'bedroom, furniture, beds, wardrobes, bedside tables'
+            'meta_title' => 'Sofas & Couches - Harvin Chairs',
+            'meta_description' => '2-seater, 3-seater, L-shaped sofas, and comfortable couches for your living space.',
+            'meta_keywords' => 'sofas, couches, 2-seater, 3-seater, L-shaped sofa, living room furniture'
         ],
         [
-            'name' => 'Dining Room',
-            'slug' => 'dining-room',
-            'details' => 'Dining furniture for memorable family meals',
+            'name' => 'Dining Tables',
+            'slug' => 'dining-tables',
+            'details' => 'Elegant dining tables for family meals and gatherings',
             'type_id' => $type->id,
             'parent' => null,
             'language' => 'en',
@@ -67,14 +67,62 @@ try {
             'is_showcase' => 1,
             'cgst_rate' => 12,
             'sgst_rate' => 12,
-            'meta_title' => 'Dining Room Furniture - Harvin Chairs',
-            'meta_description' => 'Dining tables, chairs, and sets for your perfect dining experience.',
-            'meta_keywords' => 'dining room, furniture, dining table, chairs, dining set'
+            'meta_title' => 'Dining Tables - Harvin Chairs',
+            'meta_description' => '4-seater, 6-seater, 8-seater dining tables in various styles and materials.',
+            'meta_keywords' => 'dining tables, 4-seater, 6-seater, 8-seater, dining room furniture'
         ],
         [
-            'name' => 'Office',
-            'slug' => 'office',
-            'details' => 'Professional office furniture for productivity',
+            'name' => 'Chairs',
+            'slug' => 'chairs',
+            'details' => 'Comfortable chairs for dining, living room, and office',
+            'type_id' => $type->id,
+            'parent' => null,
+            'language' => 'en',
+            'enabled' => 1,
+            'is_home' => 1,
+            'is_showcase' => 1,
+            'cgst_rate' => 12,
+            'sgst_rate' => 12,
+            'meta_title' => 'Chairs - Harvin Chairs',
+            'meta_description' => 'Dining chairs, accent chairs, office chairs, and comfortable seating solutions.',
+            'meta_keywords' => 'chairs, dining chairs, accent chairs, office chairs, seating'
+        ],
+        [
+            'name' => 'Wardrobes',
+            'slug' => 'wardrobes',
+            'details' => 'Spacious wardrobes for organized storage',
+            'type_id' => $type->id,
+            'parent' => null,
+            'language' => 'en',
+            'enabled' => 1,
+            'is_home' => 1,
+            'is_showcase' => 1,
+            'cgst_rate' => 12,
+            'sgst_rate' => 12,
+            'meta_title' => 'Wardrobes - Harvin Chairs',
+            'meta_description' => 'Sliding wardrobes, hinged wardrobes, and walk-in closet solutions.',
+            'meta_keywords' => 'wardrobes, sliding wardrobes, hinged wardrobes, closet, storage'
+        ],
+        [
+            'name' => 'Tables',
+            'slug' => 'tables',
+            'details' => 'Coffee tables, side tables, and study tables',
+            'type_id' => $type->id,
+            'parent' => null,
+            'language' => 'en',
+            'enabled' => 1,
+            'is_home' => 1,
+            'is_showcase' => 1,
+            'cgst_rate' => 12,
+            'sgst_rate' => 12,
+            'meta_title' => 'Tables - Harvin Chairs',
+            'meta_description' => 'Coffee tables, side tables, study tables, and console tables for every room.',
+            'meta_keywords' => 'tables, coffee tables, side tables, study tables, console tables'
+        ],
+        [
+            'name' => 'Office Furniture',
+            'slug' => 'office-furniture',
+            'details' => 'Professional office desks, chairs, and storage solutions',
             'type_id' => $type->id,
             'parent' => null,
             'language' => 'en',
@@ -84,13 +132,13 @@ try {
             'cgst_rate' => 12,
             'sgst_rate' => 12,
             'meta_title' => 'Office Furniture - Harvin Chairs',
-            'meta_description' => 'Office chairs, desks, and furniture for your workspace.',
-            'meta_keywords' => 'office, furniture, office chairs, desks, workspace'
+            'meta_description' => 'Office desks, ergonomic chairs, filing cabinets, and workspace solutions.',
+            'meta_keywords' => 'office furniture, office desks, ergonomic chairs, filing cabinets, workspace'
         ],
         [
-            'name' => 'Outdoor',
-            'slug' => 'outdoor',
-            'details' => 'Durable outdoor furniture for your garden and patio',
+            'name' => 'Outdoor Furniture',
+            'slug' => 'outdoor-furniture',
+            'details' => 'Durable outdoor furniture for garden and patio',
             'type_id' => $type->id,
             'parent' => null,
             'language' => 'en',
@@ -100,13 +148,13 @@ try {
             'cgst_rate' => 12,
             'sgst_rate' => 12,
             'meta_title' => 'Outdoor Furniture - Harvin Chairs',
-            'meta_description' => 'Garden furniture, patio sets, and outdoor seating solutions.',
-            'meta_keywords' => 'outdoor, furniture, garden, patio, outdoor seating'
+            'meta_description' => 'Garden chairs, patio tables, outdoor sofas, and weather-resistant furniture.',
+            'meta_keywords' => 'outdoor furniture, garden chairs, patio tables, outdoor sofas, weather-resistant'
         ],
         [
-            'name' => 'Kids & Youth',
-            'slug' => 'kids-youth',
-            'details' => 'Fun and safe furniture for children and teenagers',
+            'name' => 'Kids Furniture',
+            'slug' => 'kids-furniture',
+            'details' => 'Safe and fun furniture for children',
             'type_id' => $type->id,
             'parent' => null,
             'language' => 'en',
@@ -115,9 +163,57 @@ try {
             'is_showcase' => 1,
             'cgst_rate' => 12,
             'sgst_rate' => 12,
-            'meta_title' => 'Kids & Youth Furniture - Harvin Chairs',
-            'meta_description' => 'Children\'s furniture, study tables, and youth bedroom sets.',
-            'meta_keywords' => 'kids, youth, furniture, children, study tables'
+            'meta_title' => 'Kids Furniture - Harvin Chairs',
+            'meta_description' => 'Children\'s beds, study tables, chairs, and storage solutions for kids.',
+            'meta_keywords' => 'kids furniture, children\'s beds, study tables, kids chairs, children\'s storage'
+        ],
+        [
+            'name' => 'Storage Solutions',
+            'slug' => 'storage-solutions',
+            'details' => 'Chests of drawers, cabinets, and storage units',
+            'type_id' => $type->id,
+            'parent' => null,
+            'language' => 'en',
+            'enabled' => 1,
+            'is_home' => 1,
+            'is_showcase' => 1,
+            'cgst_rate' => 12,
+            'sgst_rate' => 12,
+            'meta_title' => 'Storage Solutions - Harvin Chairs',
+            'meta_description' => 'Chests of drawers, cabinets, bookshelves, and storage units for organized living.',
+            'meta_keywords' => 'storage solutions, chests of drawers, cabinets, bookshelves, storage units'
+        ],
+        [
+            'name' => 'Mattresses',
+            'slug' => 'mattresses',
+            'details' => 'Comfortable mattresses for all bed sizes',
+            'type_id' => $type->id,
+            'parent' => null,
+            'language' => 'en',
+            'enabled' => 1,
+            'is_home' => 1,
+            'is_showcase' => 1,
+            'cgst_rate' => 12,
+            'sgst_rate' => 12,
+            'meta_title' => 'Mattresses - Harvin Chairs',
+            'meta_description' => 'Single, double, queen, and king size mattresses in various comfort levels.',
+            'meta_keywords' => 'mattresses, single mattress, double mattress, queen mattress, king mattress'
+        ],
+        [
+            'name' => 'Accessories',
+            'slug' => 'accessories',
+            'details' => 'Cushions, throws, and furniture accessories',
+            'type_id' => $type->id,
+            'parent' => null,
+            'language' => 'en',
+            'enabled' => 1,
+            'is_home' => 1,
+            'is_showcase' => 1,
+            'cgst_rate' => 12,
+            'sgst_rate' => 12,
+            'meta_title' => 'Furniture Accessories - Harvin Chairs',
+            'meta_description' => 'Cushions, throws, table lamps, and decorative accessories for your furniture.',
+            'meta_keywords' => 'furniture accessories, cushions, throws, table lamps, decorative items'
         ]
     ];
     

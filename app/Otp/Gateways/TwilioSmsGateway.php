@@ -40,13 +40,16 @@ class TwilioSmsGateway implements OtpInterface
      * Send OTP via SMS using Twilio
      *
      * @param $phone_number
+     * @param $otp (optional) - if not provided, will generate one
      * @return Result
      */
-    public function startVerification($phone_number)
+    public function startVerification($phone_number, $otp = null)
     {
         try {
-            // Generate a 6-digit OTP
-            $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            // Use provided OTP or generate one if not provided
+            if ($otp === null) {
+                $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            }
             
             // Send SMS with OTP
             $message = $this->client->messages->create(
